@@ -40,18 +40,24 @@ def charger_modele():
     """Charge le modèle YOLO si ce n'est pas déjà fait"""
     global modele
     if modele is None:
+        # En production, utiliser le modèle custom si disponible, sinon YOLOv8n de base
         MODEL_PATH = os.path.join(settings.BASE_DIR, 'models', 'yolo_poubelles.pt')
         
-        # Si le modèle n'existe pas, le télécharger depuis Google Drive
+        # Si le modèle custom n'existe pas, utiliser YOLOv8n préentraîné (plus léger)
         if not os.path.exists(MODEL_PATH):
-            DRIVE_FILE_ID = "12XxkEpl74l-YgTTwjzninJ2wkt3PsTBk"
-            telecharger_modele_depuis_drive(DRIVE_FILE_ID, MODEL_PATH)
+            print("Modèle custom non trouvé, utilisation de YOLOv8n de base (léger)")
+            modele = YOLO('yolov8n.pt')  # Téléchargement auto du modèle de base (6MB)
+        else:
+            print("Chargement du modèle custom")
+            modele = YOLO(MODEL_PATH)
         
-        # Charger le modèle avec optimisations mémoire
+        # Optimisations mémoire
         import torch
-        modele = YOLO(MODEL_PATH)
-        # Forcer l'utilisation du CPU (pas de GPU sur Render Free)
         modele.to('cpu')
+        # Désactiver les gradients (inférence uniquement)
+        for param in modele.model.parameters():
+            param.requires_grad = False
+        
         print(f"Modèle YOLO chargé: {modele.names}")
     return modele
 
@@ -73,8 +79,8 @@ def detecter_poubelles(chemin_image, detection_id):
     image = cv2.imread(chemin_image)
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     
-    # Prédiction avec YOLO
-    resultats = model(image, conf=0.5, verbose=False)
+    # Prédiction avec YOLO (optimisé pour faible mémoire)
+    resultats = model(image, conf=0.5, verbose=False, imgsz=640, half=False)
     
     detections = []
     nb_vides = 0
