@@ -5,9 +5,19 @@ from pathlib import Path
 import os
 from django.conf import settings
 
-# Charger le modèle YOLO une seule fois au démarrage
-MODEL_PATH = os.path.join(settings.BASE_DIR, 'models', 'yolo_poubelles.pt')
-modele = YOLO(MODEL_PATH)
+# Variable globale pour le modèle
+modele = None
+
+def charger_modele():
+    """Charge le modèle YOLO si ce n'est pas déjà fait"""
+    global modele
+    if modele is None:
+        MODEL_PATH = os.path.join(settings.BASE_DIR, 'models', 'yolo_poubelles.pt')
+        if os.path.exists(MODEL_PATH):
+            modele = YOLO(MODEL_PATH)
+        else:
+            raise FileNotFoundError(f"Modèle YOLO non trouvé: {MODEL_PATH}")
+    return modele
 
 def detecter_poubelles(chemin_image, detection_id):
     """
@@ -20,12 +30,15 @@ def detecter_poubelles(chemin_image, detection_id):
     Returns:
         dict avec les résultats
     """
+    # Charger le modèle
+    model = charger_modele()
+    
     # Charger l'image
     image = cv2.imread(chemin_image)
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     
     # Prédiction avec YOLO
-    resultats = modele(image, conf=0.5, verbose=False)
+    resultats = model(image, conf=0.5, verbose=False)
     
     detections = []
     nb_vides = 0
@@ -39,7 +52,7 @@ def detecter_poubelles(chemin_image, detection_id):
             x1, y1, x2, y2 = map(int, box.xyxy[0].cpu().numpy())
             confiance = float(box.conf[0].cpu().numpy())
             classe_id = int(box.cls[0].cpu().numpy())
-            nom_classe = modele.names[classe_id]
+            nom_classe = model.names[classe_id]
             
             # Déterminer l'état
             etat = 'vide' if 'vide' in nom_classe.lower() or 'empty' in nom_classe.lower() else 'plein'
