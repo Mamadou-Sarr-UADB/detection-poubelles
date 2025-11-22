@@ -7,7 +7,7 @@
     .upload-zone {
         border: 3px dashed #667eea;
         border-radius: 20px;
-        padding: 70px;
+        padding: 50px 20px;
         text-align: center;
         margin: 30px 0;
         background: linear-gradient(135deg, #f5f7ff 0%, #e8ebff 100%);
@@ -62,7 +62,7 @@
     }
     
     .upload-label h3 {
-        font-size: 1.6em;
+        font-size: 1.4em;
         color: #333;
         margin-bottom: 10px;
         font-weight: 700;
@@ -70,7 +70,7 @@
     }
     
     .upload-label p {
-        font-size: 1.1em;
+        font-size: 1em;
         color: #666;
         font-weight: 500;
         transition: all 0.3s;
@@ -124,11 +124,13 @@
     .detection-card {
         background: white;
         border-radius: 12px;
-        padding: 20px;
+        padding: 15px;
         margin: 12px 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.06);
         border: 1px solid #e8eaed;
         transition: all 0.2s ease;
@@ -174,6 +176,63 @@
     .btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* RESPONSIVE POUR HOME */
+    @media (max-width: 768px) {
+        .upload-zone {
+            padding: 40px 15px;
+            margin: 20px 0;
+        }
+        
+        .upload-label h3 {
+            font-size: 1.2em;
+        }
+        
+        .upload-label p {
+            font-size: 0.9em;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            max-height: 250px;
+        }
+        
+        .recent-detections h2 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+        
+        .detection-card {
+            flex-direction: column;
+            text-align: center;
+            padding: 15px;
+        }
+        
+        .detection-card img {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .upload-zone {
+            padding: 30px 10px;
+        }
+        
+        .upload-label h3 {
+            font-size: 1em;
+        }
+        
+        .upload-label p {
+            font-size: 0.8em;
+        }
+        
+        .recent-detections h2 {
+            font-size: 1.3em;
+        }
     }
 </style>
 

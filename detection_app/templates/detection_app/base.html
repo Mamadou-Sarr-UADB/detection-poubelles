@@ -26,7 +26,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             background-attachment: fixed;
             min-height: 100vh;
-            padding: 30px 20px;
+            padding: 20px 15px;
             animation: fadeIn 0.5s ease-out;
         }
         
@@ -37,15 +37,15 @@
             backdrop-filter: blur(10px);
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-            padding: 50px;
+            padding: 30px 20px;
             animation: fadeIn 0.6s ease-out;
         }
         
         header {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 30px;
             position: relative;
-            padding: 30px;
+            padding: 25px 15px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 20px;
             color: white;
@@ -54,16 +54,16 @@
         
         h1 {
             color: white;
-            font-size: 2.8em;
-            margin-bottom: 15px;
+            font-size: 1.8em;
+            margin-bottom: 10px;
             font-weight: 700;
-            letter-spacing: -1px;
+            letter-spacing: -0.5px;
             text-shadow: 0 2px 10px rgba(0,0,0,0.2);
             animation: fadeIn 0.8s ease-out;
         }
         
         header p {
-            font-size: 1.15em;
+            font-size: 0.95em;
             color: rgba(255, 255, 255, 0.95);
             font-weight: 400;
             animation: fadeIn 1s ease-out;
@@ -71,9 +71,9 @@
         
         nav {
             text-align: center;
-            margin: -20px auto 40px;
+            margin: -15px auto 30px;
             background: white;
-            padding: 8px;
+            padding: 6px;
             border-radius: 50px;
             display: inline-block;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
@@ -82,13 +82,13 @@
         nav a {
             color: #333;
             text-decoration: none;
-            margin: 0 5px;
+            margin: 0 3px;
             font-weight: 600;
-            padding: 12px 28px;
+            padding: 10px 18px;
             border-radius: 50px;
             transition: all 0.3s ease;
             display: inline-block;
-            font-size: 0.95em;
+            font-size: 0.85em;
         }
         
         nav a:hover {
@@ -122,14 +122,17 @@
             display: flex;
             justify-content: space-around;
             margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
         .stat-box {
             text-align: center;
-            padding: 35px 30px;
+            padding: 25px 20px;
             border-radius: 20px;
             flex: 1;
-            margin: 0 15px;
+            min-width: 200px;
+            margin: 0;
             transition: all 0.3s ease;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             color: white;
@@ -171,9 +174,9 @@
         }
         
         .stat-number {
-            font-size: 4em;
+            font-size: 3em;
             font-weight: 700;
-            margin: 12px 0;
+            margin: 10px 0;
             color: white;
             text-shadow: 0 3px 10px rgba(0,0,0,0.2);
             position: relative;
@@ -181,20 +184,20 @@
         }
         
         .stat-label {
-            font-size: 1.1em;
-            margin-top: 10px;
+            font-size: 0.95em;
+            margin-top: 8px;
             font-weight: 600;
             color: rgba(255,255,255,0.95);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             position: relative;
             z-index: 1;
         }
         
         footer {
             text-align: center;
-            margin-top: 60px;
-            padding: 30px 20px;
+            margin-top: 40px;
+            padding: 20px 15px;
             border-top: 2px solid #f0f0f0;
             color: #999;
             font-weight: 400;
@@ -202,13 +205,119 @@
         }
         
         footer p {
-            font-size: 0.9em;
-            margin: 8px 0;
+            font-size: 0.85em;
+            margin: 6px 0;
         }
         
         footer p:first-child {
             color: #666;
             font-weight: 500;
+        }
+        
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 1200px) {
+            .container {
+                padding: 25px 15px;
+            }
+            h1 {
+                font-size: 1.6em;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 16px;
+                padding: 20px 12px;
+            }
+            
+            header {
+                padding: 20px 12px;
+                margin-bottom: 20px;
+            }
+            
+            h1 {
+                font-size: 1.4em;
+                margin-bottom: 8px;
+            }
+            
+            header p {
+                font-size: 0.85em;
+            }
+            
+            nav {
+                margin: -10px auto 20px;
+                padding: 5px;
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            nav a {
+                padding: 8px 12px;
+                font-size: 0.75em;
+                margin: 0 2px;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .stat-box {
+                margin: 0;
+                padding: 20px 15px;
+                min-width: 100%;
+            }
+            
+            .stat-number {
+                font-size: 2.5em;
+            }
+            
+            .stat-label {
+                font-size: 0.85em;
+            }
+            
+            .btn {
+                padding: 12px 24px;
+                font-size: 14px;
+                width: 100%;
+                text-align: center;
+            }
+            
+            footer {
+                margin-top: 30px;
+                padding: 15px 10px;
+            }
+            
+            footer p {
+                font-size: 0.8em;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.2em;
+            }
+            
+            header p {
+                font-size: 0.75em;
+            }
+            
+            nav a {
+                padding: 6px 10px;
+                font-size: 0.7em;
+            }
+            
+            .stat-number {
+                font-size: 2em;
+            }
+            
+            .stat-label {
+                font-size: 0.75em;
+            }
         }
     </style>
     {% block extra_css %}{% endblock %}
