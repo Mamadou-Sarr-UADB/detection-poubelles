@@ -3,20 +3,52 @@ import numpy as np
 from ultralytics import YOLO
 from pathlib import Path
 import os
+import requests
 from django.conf import settings
 
 # Variable globale pour le modèle
 modele = None
+
+def telecharger_modele_depuis_drive(file_id, destination):
+    """Télécharge le modèle depuis Google Drive"""
+    print(f"Téléchargement du modèle YOLO depuis Google Drive...")
+    
+    # URL de téléchargement direct Google Drive
+    URL = f"https://drive.google.com/uc?export=download&id={file_id}"
+    
+    session = requests.Session()
+    response = session.get(URL, stream=True)
+    
+    # Gérer la confirmation de téléchargement pour les gros fichiers
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            params = {'id': file_id, 'confirm': value}
+            response = session.get(URL, params=params, stream=True)
+    
+    # Créer le dossier si nécessaire
+    os.makedirs(os.path.dirname(destination), exist_ok=True)
+    
+    # Télécharger le fichier
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(32768):
+            if chunk:
+                f.write(chunk)
+    
+    print(f"Modèle téléchargé avec succès: {destination}")
 
 def charger_modele():
     """Charge le modèle YOLO si ce n'est pas déjà fait"""
     global modele
     if modele is None:
         MODEL_PATH = os.path.join(settings.BASE_DIR, 'models', 'yolo_poubelles.pt')
-        if os.path.exists(MODEL_PATH):
-            modele = YOLO(MODEL_PATH)
-        else:
-            raise FileNotFoundError(f"Modèle YOLO non trouvé: {MODEL_PATH}")
+        
+        # Si le modèle n'existe pas, le télécharger depuis Google Drive
+        if not os.path.exists(MODEL_PATH):
+            DRIVE_FILE_ID = "12XxkEpl74l-YgTTwjzninJ2wkt3PsTBk"
+            telecharger_modele_depuis_drive(DRIVE_FILE_ID, MODEL_PATH)
+        
+        modele = YOLO(MODEL_PATH)
+        print(f"Modèle YOLO chargé: {modele.names}")
     return modele
 
 def detecter_poubelles(chemin_image, detection_id):
