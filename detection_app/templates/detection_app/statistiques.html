@@ -1,0 +1,451 @@
+{% extends 'detection_app/base.html' %}
+
+{% block title %}Statistiques - Détections{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-header {
+        text-align: center;
+        margin-bottom: 50px;
+        animation: fadeIn 0.5s ease-out;
+    }
+    
+    .stats-header h2 {
+        color: #667eea;
+        font-size: 2.5em;
+        margin-bottom: 15px;
+    }
+    
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin: 40px 0;
+        animation: fadeIn 0.7s ease-out;
+    }
+    
+    .stats-card {
+        background: white;
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+    }
+    
+    .stats-card.vide::before {
+        background: linear-gradient(90deg, #4caf50 0%, #45a049 100%);
+    }
+    
+    .stats-card.pleine::before {
+        background: linear-gradient(90deg, #f44336 0%, #d32f2f 100%);
+    }
+    
+    .stats-card-icon {
+        font-size: 3.5em;
+        margin-bottom: 15px;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .stats-card-number {
+        font-size: 3.5em;
+        font-weight: bold;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 15px 0;
+    }
+    
+    .stats-card.vide .stats-card-number {
+        background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .stats-card.pleine .stats-card-number {
+        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .stats-card-label {
+        font-size: 1.2em;
+        color: #666;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .charts-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin: 50px 0;
+        animation: fadeIn 1s ease-out;
+    }
+    
+    .chart-box {
+        background: white;
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .chart-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.12);
+    }
+    
+    .chart-box h3 {
+        color: #667eea;
+        font-size: 1.8em;
+        margin-bottom: 25px;
+        text-align: center;
+        font-weight: 600;
+    }
+    
+    .chart-wrapper {
+        position: relative;
+        height: 350px;
+    }
+    
+    .no-data {
+        text-align: center;
+        padding: 80px 20px;
+        animation: fadeIn 1s ease-out;
+    }
+    
+    .no-data-icon {
+        font-size: 6em;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .no-data p {
+        font-size: 1.3em;
+        color: #666;
+        margin-bottom: 30px;
+    }
+    
+    @media (max-width: 768px) {
+        .charts-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="stats-header">
+    <h2>📊 Statistiques Détaillées</h2>
+    <p style="font-size: 1.2em; color: #666;">Vue d'ensemble de toutes vos détections</p>
+</div>
+
+<div class="stats-cards">
+    <div class="stats-card">
+        <div class="stats-card-icon">🔍</div>
+        <div class="stats-card-number">{{ total_detections }}</div>
+        <div class="stats-card-label">Détections Totales</div>
+    </div>
+    
+    <div class="stats-card">
+        <div class="stats-card-icon">📦</div>
+        <div class="stats-card-number">{{ total_poubelles }}</div>
+        <div class="stats-card-label">Poubelles Détectées</div>
+    </div>
+    
+    <div class="stats-card vide">
+        <div class="stats-card-icon">✅</div>
+        <div class="stats-card-number">{{ total_vides }}</div>
+        <div class="stats-card-label">Poubelles Vides</div>
+    </div>
+    
+    <div class="stats-card pleine">
+        <div class="stats-card-icon">❌</div>
+        <div class="stats-card-number">{{ total_pleines }}</div>
+        <div class="stats-card-label">Poubelles Pleines</div>
+    </div>
+</div>
+
+{% if total_detections > 0 %}
+<div class="charts-container">
+    <div class="chart-box">
+        <h3>📊 Répartition Vides/Pleines</h3>
+        <div class="chart-wrapper">
+            <canvas id="pieChart"></canvas>
+        </div>
+    </div>
+    
+    <div class="chart-box">
+        <h3>📈 Détections par Jour</h3>
+        <div class="chart-wrapper">
+            <canvas id="lineChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="chart-box" style="animation: fadeIn 1.2s ease-out;">
+    <h3>📊 Statistiques Détaillées par Jour</h3>
+    <div class="chart-wrapper" style="height: 400px;">
+        <canvas id="barChart"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Données depuis Django
+const dates = {{ dates_json|safe }};
+const totaux = {{ totaux_json|safe }};
+const vides = {{ vides_json|safe }};
+const pleines = {{ pleines_json|safe }};
+
+// Configuration commune
+Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+Chart.defaults.font.size = 14;
+
+// Graphique circulaire (Pie Chart)
+const pieCtx = document.getElementById('pieChart').getContext('2d');
+new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Vides', 'Pleines'],
+        datasets: [{
+            data: [{{ total_vides }}, {{ total_pleines }}],
+            backgroundColor: [
+                'rgba(76, 175, 80, 0.8)',
+                'rgba(244, 67, 54, 0.8)'
+            ],
+            borderColor: [
+                'rgba(76, 175, 80, 1)',
+                'rgba(244, 67, 54, 1)'
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 20,
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                padding: 12,
+                titleFont: {
+                    size: 16
+                },
+                bodyFont: {
+                    size: 14
+                },
+                callbacks: {
+                    label: function(context) {
+                        const total = {{ total_vides }} + {{ total_pleines }};
+                        const percentage = ((context.parsed / total) * 100).toFixed(1);
+                        return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                    }
+                }
+            }
+        },
+        animation: {
+            animateScale: true,
+            animateRotate: true
+        }
+    }
+});
+
+// Graphique linéaire (Line Chart)
+const lineCtx = document.getElementById('lineChart').getContext('2d');
+new Chart(lineCtx, {
+    type: 'line',
+    data: {
+        labels: dates,
+        datasets: [{
+            label: 'Détections par jour',
+            data: totaux,
+            borderColor: 'rgba(102, 126, 234, 1)',
+            backgroundColor: 'rgba(102, 126, 234, 0.2)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                padding: 12,
+                titleFont: {
+                    size: 16
+                },
+                bodyFont: {
+                    size: 14
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1,
+                    font: {
+                        size: 12
+                    }
+                },
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                }
+            },
+            x: {
+                ticks: {
+                    font: {
+                        size: 12
+                    }
+                },
+                grid: {
+                    display: false
+                }
+            }
+        },
+        animation: {
+            duration: 2000,
+            easing: 'easeInOutQuart'
+        }
+    }
+});
+
+// Graphique à barres (Bar Chart)
+const barCtx = document.getElementById('barChart').getContext('2d');
+new Chart(barCtx, {
+    type: 'bar',
+    data: {
+        labels: dates,
+        datasets: [
+            {
+                label: 'Vides',
+                data: vides,
+                backgroundColor: 'rgba(76, 175, 80, 0.8)',
+                borderColor: 'rgba(76, 175, 80, 1)',
+                borderWidth: 2,
+                borderRadius: 8
+            },
+            {
+                label: 'Pleines',
+                data: pleines,
+                backgroundColor: 'rgba(244, 67, 54, 0.8)',
+                borderColor: 'rgba(244, 67, 54, 1)',
+                borderWidth: 2,
+                borderRadius: 8
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 20,
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                padding: 12,
+                titleFont: {
+                    size: 16
+                },
+                bodyFont: {
+                    size: 14
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                stacked: false,
+                ticks: {
+                    stepSize: 1,
+                    font: {
+                        size: 12
+                    }
+                },
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                }
+            },
+            x: {
+                stacked: false,
+                ticks: {
+                    font: {
+                        size: 12
+                    }
+                },
+                grid: {
+                    display: false
+                }
+            }
+        },
+        animation: {
+            duration: 2000,
+            easing: 'easeInOutQuart'
+        }
+    }
+});
+</script>
+
+{% else %}
+<div class="no-data">
+    <div class="no-data-icon">📊</div>
+    <p>Aucune donnée disponible pour le moment</p>
+    <a href="{% url 'home' %}" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 1.2em; display: inline-block;">🚀 Commencer une Détection</a>
+</div>
+{% endif %}
+
+<div style="text-align: center; margin-top: 60px; animation: fadeIn 1.5s ease-out;">
+    <a href="{% url 'home' %}" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 35px; border-radius: 30px; text-decoration: none; font-weight: 600; margin: 10px;">🏠 Accueil</a>
+    <a href="{% url 'historique' %}" class="btn" style="background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%); color: white; padding: 15px 35px; border-radius: 30px; text-decoration: none; font-weight: 600; margin: 10px;">📊 Historique</a>
+</div>
+{% endblock %}

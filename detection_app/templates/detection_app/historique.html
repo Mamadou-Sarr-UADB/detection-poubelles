@@ -1,0 +1,181 @@
+{% extends 'detection_app/base.html' %}
+
+{% block title %}Historique - Détections{% endblock %}
+
+{% block extra_css %}
+<style>
+    .history-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 30px;
+        margin: 40px 0;
+    }
+    
+    .history-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        border: 1px solid #e8eaed;
+        transition: all 0.2s ease;
+        animation: fadeIn 0.5s ease-out;
+        animation-fill-mode: both;
+        position: relative;
+    }
+    
+    .history-card:nth-child(1) { animation-delay: 0.1s; }
+    .history-card:nth-child(2) { animation-delay: 0.2s; }
+    .history-card:nth-child(3) { animation-delay: 0.3s; }
+    .history-card:nth-child(4) { animation-delay: 0.4s; }
+    .history-card:nth-child(5) { animation-delay: 0.5s; }
+    .history-card:nth-child(6) { animation-delay: 0.6s; }
+    
+    .history-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .history-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .history-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+    }
+    
+    .history-card img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+    
+    .history-card:hover img {
+        transform: scale(1.1);
+    }
+    
+    .history-card-content {
+        padding: 25px;
+    }
+    
+    .history-card-content strong {
+        font-size: 1.1em;
+        color: #667eea;
+        display: block;
+        margin-bottom: 15px;
+    }
+    
+    .history-stats {
+        display: flex;
+        justify-content: space-around;
+        margin: 20px 0;
+        padding: 15px 0;
+        border-top: 2px solid #f0f2ff;
+        border-bottom: 2px solid #f0f2ff;
+    }
+    
+    .mini-stat {
+        text-align: center;
+        transition: transform 0.3s;
+    }
+    
+    .mini-stat:hover {
+        transform: scale(1.1);
+    }
+    
+    .mini-stat-number {
+        font-size: 2em;
+        font-weight: bold;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .mini-stat-label {
+        font-size: 0.9em;
+        color: #888;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 5px;
+    }
+    
+    .btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 25px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        display: inline-block;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 style="text-align: center; margin-bottom: 20px; color: #1a1a1a; font-size: 2em; font-weight: 600; animation: fadeIn 0.5s ease-out;">Historique des détections</h2>
+
+<div style="text-align: center; color: #666; font-size: 1.1em; margin-bottom: 40px; animation: fadeIn 0.7s ease-out;">
+    {% if detections %}
+        {{ detections|length }} détection{{ detections|length|pluralize }} enregistrée{{ detections|length|pluralize }}
+    {% else %}
+        Aucune détection enregistrée
+    {% endif %}
+</div>
+
+{% if detections %}
+<div class="history-grid">
+    {% for detection in detections %}
+    <div class="history-card">
+        <img src="{{ detection.image.url }}" alt="Detection {{ detection.id }}">
+        <div class="history-card-content">
+            <strong>🕒 {{ detection.date_upload|date:"d/m/Y à H:i" }}</strong>
+            
+            <div class="history-stats">
+                <div class="mini-stat">
+                    <div class="mini-stat-number">{{ detection.nombre_poubelles }}</div>
+                    <div class="mini-stat-label">📦 Total</div>
+                </div>
+                <div class="mini-stat">
+                    <div class="mini-stat-number">{{ detection.nombre_vides }}</div>
+                    <div class="mini-stat-label">✅ Vides</div>
+                </div>
+                <div class="mini-stat">
+                    <div class="mini-stat-number">{{ detection.nombre_pleines }}</div>
+                    <div class="mini-stat-label">❌ Pleines</div>
+                </div>
+            </div>
+            
+            <a href="{% url 'resultat' detection.id %}" class="btn" style="width: 100%; text-align: center; margin-top: 15px; display: block;">Voir Détails</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div style="text-align: center; padding: 60px 20px; animation: fadeIn 1s ease-out;">
+    <div style="font-size: 5em; margin-bottom: 20px;">📭</div>
+    <p style="font-size: 1.3em; color: #666; margin-bottom: 30px;">Aucune détection pour le moment</p>
+    <a href="{% url 'home' %}" class="btn" style="font-size: 1.2em; padding: 15px 40px;">🚀 Commencer une Détection</a>
+</div>
+{% endif %}
+
+<div style="text-align: center; margin-top: 50px; animation: fadeIn 1.2s ease-out;">
+    <a href="{% url 'home' %}" class="btn" style="background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);">🏠 Retour à l'Accueil</a>
+</div>
+{% endblock %}

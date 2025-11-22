@@ -1,0 +1,221 @@
+{% extends 'detection_app/base.html' %}
+{% load static %}
+
+{% block title %}Résultats - Détection{% endblock %}
+
+{% block extra_css %}
+<style>
+    .result-images {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin: 40px 0;
+        animation: fadeIn 0.8s ease-out;
+    }
+    
+    .image-container {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        border: 1px solid #e8eaed;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+    
+    .image-container:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .image-container img {
+        width: 100%;
+        height: auto;
+        display: block;
+        cursor: zoom-in;
+        transition: transform 0.3s;
+    }
+    
+    .image-container:hover img {
+        transform: scale(1.05);
+    }
+    
+    .image-label {
+        background: #f8f9fa;
+        color: #1a1a1a;
+        padding: 12px;
+        text-align: center;
+        font-weight: 500;
+        font-size: 0.95em;
+        border-bottom: 1px solid #e8eaed;
+    }
+    
+    .detections-list {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin: 32px 0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        border: 1px solid #e8eaed;
+        animation: fadeIn 1s ease-out;
+    }
+    
+    .detections-list h3 {
+        color: #1a1a1a;
+        font-size: 1.4em;
+        font-weight: 600;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .detection-item {
+        background: #fafafa;
+        border-left: 4px solid #1a73e8;
+        padding: 16px;
+        margin: 12px 0;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        animation: slideInLeft 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .detection-item:nth-child(2) { animation-delay: 0.1s; }
+    .detection-item:nth-child(3) { animation-delay: 0.2s; }
+    .detection-item:nth-child(4) { animation-delay: 0.3s; }
+    .detection-item:nth-child(5) { animation-delay: 0.4s; }
+    
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .detection-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.12);
+    }
+    
+    .detection-item.vide {
+        border-left-color: #34a853;
+        background: #fafafa;
+    }
+    
+    .detection-item.plein {
+        border-left-color: #ea4335;
+        background: #fafafa;
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 16px;
+        font-weight: 500;
+        font-size: 0.85em;
+        text-transform: capitalize;
+    }
+    
+    .badge.vide {
+        background: #e6f4ea;
+        color: #1e8e3e;
+    }
+    
+    .badge.plein {
+        background: #fce8e6;
+        color: #c5221f;
+    }
+    
+    .btn {
+        background: #1a73e8;
+        color: white;
+        padding: 12px 28px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.95em;
+        transition: all 0.2s;
+        display: inline-block;
+        margin: 8px;
+    }
+    
+    .btn:hover {
+        background: #1557b0;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    }
+    
+    .btn.secondary {
+        background: #5f6368;
+    }
+    
+    .btn.secondary:hover {
+        background: #3c4043;
+    }
+    
+    @media (max-width: 768px) {
+        .result-images {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 style="text-align: center; margin-bottom: 32px; color: #1a1a1a; font-size: 2em; font-weight: 600; animation: fadeIn 0.5s ease-out;">Résultats de la détection</h2>
+
+<div style="text-align: center; color: #5f6368; font-size: 0.95em; margin-bottom: 32px; animation: fadeIn 0.7s ease-out;">
+    {{ detection.date_upload|date:"d/m/Y à H:i" }}
+</div>
+
+<div class="stats" style="animation: fadeIn 0.9s ease-out;">
+    <div class="stat-box total">
+        <div class="stat-number">{{ detection.nombre_poubelles }}</div>
+        <div class="stat-label">Total Détecté</div>
+    </div>
+    <div class="stat-box vide">
+        <div class="stat-number">{{ detection.nombre_vides }}</div>
+        <div class="stat-label">Poubelles Vides</div>
+    </div>
+    <div class="stat-box pleine">
+        <div class="stat-number">{{ detection.nombre_pleines }}</div>
+        <div class="stat-label">Poubelles Pleines</div>
+    </div>
+</div>
+
+<div class="result-images">
+    <div class="image-container">
+        <div class="image-label">Image Originale</div>
+        <img src="{{ detection.image.url }}" alt="Image originale">
+    </div>
+    <div class="image-container">
+        <div class="image-label">Résultat de Détection</div>
+        <img src="/media/{{ detection.image_resultat }}" alt="Résultat">
+    </div>
+</div>
+
+{% if detection.detections_json %}
+<div class="detections-list">
+    <h3>📝 Détails des Détections</h3>
+    {% for det in detection.detections_json %}
+    <div class="detection-item {{ det.etat }}">
+        <span class="badge {{ det.etat }}">
+            {% if det.etat == 'vide' %}✅{% else %}❌{% endif %} {{ det.etat|upper }}
+        </span>
+        <strong style="font-size: 1.2em; color: #333; margin-left: 15px;">Poubelle #{{ forloop.counter }}</strong>
+        <div style="margin-top: 12px; color: #555; line-height: 1.8;">
+            📦 <strong>Classe:</strong> {{ det.classe }}<br>
+            🎯 <strong>Confiance:</strong> {{ det.confiance|floatformat:0 }}%<br>
+            📍 <strong>Position:</strong> {{ det.bbox }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div style="text-align: center; margin-top: 50px; animation: fadeIn 1.2s ease-out;">
+    <a href="{% url 'home' %}" class="btn">🔄 Nouvelle Détection</a>
+    <a href="{% url 'historique' %}" class="btn secondary">📊 Voir Historique</a>
+</div>
+{% endblock %}
