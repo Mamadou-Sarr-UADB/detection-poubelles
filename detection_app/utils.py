@@ -47,7 +47,11 @@ def charger_modele():
             DRIVE_FILE_ID = "12XxkEpl74l-YgTTwjzninJ2wkt3PsTBk"
             telecharger_modele_depuis_drive(DRIVE_FILE_ID, MODEL_PATH)
         
+        # Charger le modèle avec optimisations mémoire
+        import torch
         modele = YOLO(MODEL_PATH)
+        # Forcer l'utilisation du CPU (pas de GPU sur Render Free)
+        modele.to('cpu')
         print(f"Modèle YOLO chargé: {modele.names}")
     return modele
 
