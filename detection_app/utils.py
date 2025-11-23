@@ -37,28 +37,29 @@ def telecharger_modele_depuis_drive(file_id, destination):
     print(f"Modèle téléchargé avec succès: {destination}")
 
 def charger_modele():
-    """Charge le modèle YOLO si ce n'est pas déjà fait"""
+    """Charge le modèle YOLO (ONNX prioritaire pour déploiement)"""
     global modele
     if modele is None:
-        # En production, utiliser le modèle custom si disponible, sinon YOLOv8n de base
-        MODEL_PATH = os.path.join(settings.BASE_DIR, 'models', 'yolo_poubelles.pt')
+        # Priorité 1: ONNX (optimisé pour déploiement)
+        ONNX_PATH = os.path.join(settings.BASE_DIR, 'models', 'yolo_poubelles.onnx')
+        PT_PATH = os.path.join(settings.BASE_DIR, 'models', 'yolo_poubelles.pt')
         
-        # Si le modèle custom n'existe pas, utiliser YOLOv8n préentraîné (plus léger)
-        if not os.path.exists(MODEL_PATH):
-            print("Modèle custom non trouvé, utilisation de YOLOv8n de base (léger)")
-            modele = YOLO('yolov8n.pt')  # Téléchargement auto du modèle de base (6MB)
+        if os.path.exists(ONNX_PATH):
+            print("✅ Chargement du modèle ONNX (optimisé)")
+            modele = YOLO(ONNX_PATH, task='detect')
+        elif os.path.exists(PT_PATH):
+            print("Chargement du modèle PyTorch (.pt)")
+            modele = YOLO(PT_PATH)
+            # Optimisations mémoire
+            import torch
+            modele.to('cpu')
+            for param in modele.model.parameters():
+                param.requires_grad = False
         else:
-            print("Chargement du modèle custom")
-            modele = YOLO(MODEL_PATH)
+            print("Modèle custom non trouvé, utilisation de YOLOv8n de base")
+            modele = YOLO('yolov8n.pt')
         
-        # Optimisations mémoire
-        import torch
-        modele.to('cpu')
-        # Désactiver les gradients (inférence uniquement)
-        for param in modele.model.parameters():
-            param.requires_grad = False
-        
-        print(f"Modèle YOLO chargé: {modele.names}")
+        print(f"Modèle chargé: {modele.names}")
     return modele
 
 def detecter_poubelles(chemin_image, detection_id):
